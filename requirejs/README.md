@@ -12,8 +12,8 @@ and various (and quite often confusing) configuration.
 1. [Introduction](#i-introduction)
 2. [Setup](#ii-setup)
 3. [Initializing `requirejs`](#iii-initializing-requirejs)
-4. [Bootstrap (`main.js`)](#iv-bootstrap-main-js)
-5. [Acknowledgments](../../README.md#acknowledgments)
+4. [Bootstrap (`main.js`)](#iv-bootstrap-mainjs)
+5. [Acknowledgments](../README.md#acknowledgments)
 
 ## I. Introduction
 
