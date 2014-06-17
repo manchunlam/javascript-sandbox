@@ -74,8 +74,7 @@ To run the project
 
 ```
 cd <projectRoot>
-ws --directory . --log-format dev
-# --directory: specify project root
+ws --log-format dev
 # --log-format: "dev" means development, it gives very verbose output
 ```
 
