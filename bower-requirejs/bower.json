@@ -1,0 +1,23 @@
+{
+  "name": "bower-requirejs",
+  "version": "1.0.0",
+  "homepage": "https://github.com/manchunlam/javascript-sandbox",
+  "authors": [
+    "ManChun Lam <manchunlam@gmail.com>"
+  ],
+  "description": "Use bower to manage javascript dependencies",
+  "main": "index.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.15",
+    "text": "~2.0.12"
+  }
+}

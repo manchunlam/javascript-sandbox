@@ -6,7 +6,8 @@ come with a project to demonstrate the concepts.
 ## Table of Content
 
 1. [Fundamental `requirejs`](requirejs/README.md)
-2. [Acknowledgments](#acknowledgments)
+2. [Using `bower` to Manage `requirejs` Dependencies](bower-requirejs/README.md)
+3. [Acknowledgments](#acknowledgments)
 
 ## Acknowledgments
 
