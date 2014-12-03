@@ -13,8 +13,8 @@ As a project grows, we require more and more libraries, and it gets hairy to
 manage them. `bower` is a tool to manage javascript libraries, and their
 dependencies.
 
-In this article, we will change our previous [project](requirejs) to accommodate
-`bower`
+In this article, we will change our previous [project](../requirejs) to
+accommodate `bower`.
 
 ## II. Installing `bower`
 
