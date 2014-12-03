@@ -2,10 +2,10 @@
 
 ## Table of Contents
 
-1. [Introduction](i-introduction)
-2. [Installing `bower`](ii-installing-bower)
-3. [Prepare the Project for `bower`](iii-prepare-the-project-for-bower)
-4. [Run the Project!](iv-run-the-project)
+1. [Introduction](#i-introduction)
+2. [Installing `bower`](#ii-installing-bower)
+3. [Prepare the Project for `bower`](#iii-prepare-the-project-for-bower)
+4. [Run the Project!](#iv-run-the-project)
 
 ## I. Introduction
 
