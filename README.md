@@ -7,7 +7,8 @@ come with a project to demonstrate the concepts.
 
 1. [Fundamental `requirejs`](requirejs/README.md)
 2. [Using `bower` to Manage `requirejs` Dependencies](bower-requirejs/README.md)
-3. [Acknowledgments](#acknowledgments)
+3. [Using `shim`s in `requirejs`](requirejs-shims/README.md)
+4. [Acknowledgments](#acknowledgments)
 
 ## Acknowledgments
 
