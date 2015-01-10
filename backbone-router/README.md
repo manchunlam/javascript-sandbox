@@ -27,8 +27,8 @@ Backbone router interprets a path to be **anything after /#**
 * Valid URL for Backbone routers
 
     ```text
-    example.com/#/foo
-    example.com/#/foo/123
+    example.com/#foo
+    example.com/#foo/123
     ```
 
 ## II. Preparation
