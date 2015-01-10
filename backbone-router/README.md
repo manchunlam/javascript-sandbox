@@ -1,197 +1,379 @@
-# Using `shim`s in `requirejs`
+# Backbone Router
 
 ## Table of Contents
 
 1. [Introduction](#i-introduction)
-2. [Why `shim`s?](#ii-why-shims)
-3. [Install All the libraries](#iii-install-all-the-libraries)
-4. [Setting up `shim`s](#iv-setting-up-shims)
-5. [Setting Dependencies for `shim`s](#v-setting-dependencies-for-shims)
-6. [`define` does not Need All Libraries Declared]
-  (#vi-define-does-not-need-all-libraries-declared)
+2. [Preparation](#ii-preparation)
+    1. [How does `requirejs` come into play?](#a-how-does-requirejs-come-into-play)
+    2. [DRY, Re-Use `requirejs` Modules](#b-dry-re-use-requirejs-modules)
+3. [Application Router](#iii-application-router)
+    1. [Create a Router](#a-create-a-router)
+    2. [Make a Router Class](#b-make-a-router-class)
+    3. [Specify `routes` in the Router](#c-specify-routes-in-the-router)
+    4. [Constructor for Our Router](#d-constructor-for-our-router)
+4. [Application Entry Point](#iv-application-entry-point)
+5. [Load Our Application onto the Site](#v-load-our-application-onto-the-site)
+6. [Testing](#vi-testing)
+    1. [See Router in Action](a-see-router-in-action)
+    2. [See that There is No Page Load](b-see-that-there-is-no-page-load)
 
 ## I. Introduction
 
-In this article, we will include javascript libraries that are not `AMD` ready
-using `shim`s. And then specify its `path`, so `requiejs` knows where to find
-them.
+Backbone routers are analogous to _controller_ in an MVC. It tells the
+application what _action_ to perform based on the _path_ in the URL.
 
-## II. Why `shim`s?
+Backbone router interprets a path to be **anything after /#**
 
-Not all javascript libraries are written with `AMD` in mind. To have them
-included with `requirejs`, we need to tell `requirejs`
+* Valid URL for Backbone routers
 
-1. How do we invoke it in our code?
-
-    For example,
-
-    `backbonejs` functions are to be called with `Backbone.*`
-
-2. Where is the library located.
-
-For point 2, we have seen the attribute `path`. For the first point, we will
-introduce a new concept in `requirejs`, the `shim`s.
-
-## III. Install All the Libraries
-
-Like the previous article, we will install everything we need with `bower`
-
-```sh
-$(npm bin)/bower install jquery backbone Backbone.localStorage
-```
-
-## IV. Setting up `shim`s
-
-The purpose of `shim`s are to tell `requirejs` **2** things
-
-1. How do we invoke this javascript library?
-2. What must be loaded before the library is usable?
-
-We will add the `shim`s in our `requirejs.config` block
-
-```javascript
-requirejs.config({
-  ...
-  shim: {
-    underscore: {
-      exports: '_'
-    }
-  }
-});
-```
-
-In the above code, we are saying
-
-1. The dependency **name** that we will pass to any `define` function is
-  `underscore`
-2. The `exports` attribute means:
-
-    The intended **global** variable (aka. `windows.*`) is actually `_`.
-
-    That is, whenever `requirejs` sees `underscore` as a dependency, please
-    translate that to
-
-    ```javascript
-    window._
+    ```text
+    example.com/#/foo
+    example.com/#/foo/123
     ```
 
-    Therefore, when we have `underscore` as a dependency, the `_.*` functions
-    will be available to us.
+## II. Preparation
 
-3. The `underscore` library doesn't depend on anything. In later sections,
-  we will add another attribute to indicate a library depends on other libraries
-  to be loaded first.
+We have covered both `requirejs` for module management, and `bower` for
+dependency management prior. It's time for us to make a real application.
 
-### A. Adding to `path`
+We need to
 
-With any library, we have to tell `requirejs` where it sits. `shim`s are no
-different.
+1. Make a router! <sup>[1](#iii-application-router)</sup>
+1. Create an entry point to the application (`js/app.js`) <sup>[2]
+  (#iv-application-entry-point)</sup>
+    1. Tell `requirejs` the application depends on a router
+    2. Initialize the router
+2. Let the site know of the existence of this application (`js/main.js`, which
+    is included in `index.html`) <sup>
+  [3](#v-load-our-application-onto-the-site)</sup>
 
-Add to our `requirejs.config` block with
+### A. How does `requirejs` come into play?
 
-```javascript
-requirejs.config({
-  shim: ...,
-  paths: {
-    ...,
-    underscore: 'lib/underscore/underscore'
-  }
-})
-```
+In the previous articles, we have included all the external libraries that our
+application needs. As we build the application, it itself has a lot of
+components too. This is when `requirejs` shines.
 
-### B. Test Drive!
+From the list above, we are adding at least 2 components,
 
-We will add to our `define` function in `js/main.js` to use the `underscore`
-library.
+1. Router
+2. Application
 
-```javascript
-define(['underscore'], function(_) {
-  var myArray = [{ id: 123, name: 'foo' }, { id: 345, name: 'bar' }]
-  console.log(typeof _.where(myArray, { id: 123 }));
-  // array
-  // [{ id: 123, name: foo }]
-});
-```
+Let's think about what module(s) each of them needs.
 
-## V. Setting Dependencies for `shim`s
+1. Router depends on
+    * `backbone`
+2. Application depends on
+    * `router`
+3. The site depends on
+    * `app`
 
-Most libraries have dependencies, some other code/libraries must load before
-its turn. That's when the `dep` attribute comes into play
+To achieve that, in each component, we define a `requirejs` module, and load
+the appropriate dependencies.
 
-We want to include `backbone.js`, and we know `backbone` has a hard dependency
-on `underscore`, and `jquery` (for `Backbone.View`). Therefore, we must tell
-`requirejs`:
+### B. DRY, Re-Use `requirejs` Modules
 
-1. We need `backbonejs`
-2. How can we call it?
-3. List all dependencies, if any, for the `backbonejs` library, so `requirejs`
-  will for sure load those first
+Within `requirejs` modules, code has explicit dependencies listed, and isolated
+scope. All is good, **but** how do modules talk with each other?
 
-Let's re-visit our `requirejs.config` block.
+The answer is to `return` what you want publicly accessible from each module.
 
 ```javascript
-requirejs.config({
-  ...,
-  shim: {
-    ...,
-    jquery: {
-      exports: '$'
-    },
-    backbone: {
-      deps: ['underscore', 'jquery'],
-      exports: 'Backbone'
-    }
-  },
-  paths: {
-    ...,
-    jquery: 'lib/jquery/dist/jquery',
-    backbone: 'lib/backbone/backbone'
+// foo.js
+define([], function() {
+  var name = 'foobar';
+
+  var sayMyName = function() {
+    console.log('My name is ' + name)
+  };
+
+  var privateAttribute = 'no one outside can see me';
+
+  return {
+    anAttribute: name,
+    aMethod: sayMyName
   }
 });
 ```
 
-The `deps` attribute defines what `backbone` needs. The names should match the
-library attributes you have defined prior inside `shim:`.
+```javascript
+// bar.js
 
-### A. Test Drive
+define([
+  'foo'
+], function(Foo) {
+  console.log(Foo.anAttribute); // foobar
+
+  Foo.aMethod(); // My name is foobar
+
+  Foo.privateAttribute; // undefined
+});
+```
+
+## III. Application Router
+
+There are a few steps
+
+1. Make a `router` module, and define the dependencies
+2. Make our own `Backbone.Router`
+3. Specify the routes (URL paths) in our Router
+4. Tell each route (think of it as _action_ in MVC _controllers_) what to
+    do
+
+### A. Create a Router
+
+1. In `$projectRoot`, create an `router.js`.
+2. Configure a module, and its dependencies
+
+    ```javascript
+    // router.js
+    define([
+      'jquery',
+      'underscore',
+      'backbone'
+    ], function($, _, Backbone) {
+    })
+    ```
+
+    **Notes**:
+
+    * Here, we are saying the `router` (as the filename implies) module depends
+      on `jquery`, `underscore`, and `backbone` modules
+
+### B. Make a Router Class
+
+To make our own `Backbone.Router` class for **our application**
 
 ```javascript
-define(['backbone'], function(Backbone) {
-  // Define a Backbone.Model class
-  var Person = Backbone.Model.extend({
-      initialize: function() {
-        console.log('Person object initialized');
-      }
+// router.js
+
+define([
+  ...
+], function(..., Backbone) {
+  var AppRouter = Backbone.Router.extend({
+  });
+}
+```
+
+### C. Specify routes in the Router
+
+For a Router to function, it needs to know
+
+1. What _path_(s) is the application expecting?
+2. What **event** it should fire when the URL path matches?
+
+To define routes on our Router class,
+
+```javascript
+// router.js
+
+var AppRouter = Backbone.Router.extend({
+  routes: {
+    'users': 'showUsers',
+
+    '*actions': 'defaultAction'
+  }
+});
+```
+
+**Note**
+
+1. The `backbone` documentation explicitly says
+
+    > avoid using a **leading** slash in your route definitions
+
+1. The routes are matched from top to bottom. **The more general the match, the
+  closer it should be defined towards the end**
+
+2. Route-matches **fire events**, therefore the values are **strings**. They are
+  the names of the events. **Not** a function to call.
+
+2. The above will match `example.com/#/users`, and fire the **event**
+    `showUsers`
+
+3. Any other routes will fire the **event** `defaultAction`
+
+### D. Constructor for Our Router
+
+In this step, we want to achieve 3 goals
+
+1. Listen to the fired events, and do something
+2. Allow **outside** modules to initiate our router class
+3. Allow our routes to be bookmark-able, and navigable
+    * If a user bookmarks `example.com/#/user`, it will always take you to the
+      right View of the Backbone app
+    * If a user goes to `/#/users` from `/#/home`; when he clicks the
+      _Back_ button, it should take him back to `/#/home`
+
+```javascript
+define([
+  ...
+], function(...) {
+  var AppRouter = ...
+
+  var constructor = function() {
+    var app_router = new AppRouter();
+
+    // Listen to router-fired events
+    app_router.on('showUsers', function() {
+      console.log('Show list of users');
     });
 
-  // An object of Person, which is a Backbone.Model object
-  var person = new Person({ name: 'Joe Lam', age: 31 });
-  console.log(person.get('name'));
-  // "Joe Lam"
+    app_router.on('defaultAction', function(route) {
+      console.log("We don't recognize this route, " + route);
+    });
+
+    // Make application navigable
+    Backbone.history.start();
+  };
+
+  // Return something from this module, so other modules can use it
+  return {
+    initialize: constructor
+  }
 })
 ```
 
-## VI. `define` does not Need All Libraries Declared
+This code is pretty dense, let's analyze it in blocks.
 
-The observant readers will see that, in the `define` code of Section V, I didn't
-declare `underscore` (`_`), and `jquery` (`$`) in the `define` function.
+1. We created an `constructor` variable which is a function. Inside it, we
 
-That's ok!
+    1. Created an instance of our Router class
+    2. Have it listen on the events we defined (triggered by route-matches)
+    3. Defined what is done for each event (i.e. event-handlers)
 
-`requirejs` will automatically include the dependencies for any libraries you
-need in the `define` function even if you don't. **As long as** you have
-declared them in the `shim`s.
+2. Start the History API of Backbone which makes our application work with the
+    _Back_ button, and different paths can be bookmarked
 
-That is, when you do
+3. The `return` is significant. We are saying,
+
+    This module will return a JSON object, the key is "initialize", its value
+    is a function.
+
+    With this, any other modules can say
+
+    ```javascript
+    MyAwesomeRouter.initialize()
+    ```
+
+    It will go grab the **value** of the key "initialize" from the JSON, and
+    and then executes it (because of `()`)
+
+## IV. Application Entry Point
+
+We have a Router, now we need to make the application, and have it start the
+router.
+
+Make a new file `js/app.js`
 
 ```javascript
-define(['backbone'], function(Backbone) {
+// app.js
+
+define([
+  'router'
+], function(Router) {
+  Router.initialize();
 });
 ```
 
-`requirejs` will automatically provide `Backbone` with
+The above code will do the job just fine. However, eventually the `app` module
+needs to be used somewhere else. We need a **public** interface to start the
+`app` module.
 
-1. `jquery` (aka. `$`), **and**
-2. `underscore` (aka. `_`)
+Just like all `requirejs` module, we use `return` to expose a public interface.
 
-to `Backbone` when you call it.
+```javascript
+// app.js
+
+define([
+  'router'
+], function(Router) {
+  // constructor for `app` module
+  var initialize = function() {
+    Router.initialize();
+  }
+
+  return {
+    initialize: initialize
+  };
+});
+```
+
+With the enhanced version, we can start the `app` module anywhere with
+
+```javascript
+define([
+  'app'
+], function(App) {
+  App.initialize();
+});
+```
+
+## V. Load Our Application onto the Site
+
+Finally! We have the Router, and the application; we have to put it onto our
+site, so people can use it.
+
+Remember, our `index.html` only knows of the existence of `main.js`, so we have
+to put our application there.
+
+```javascript
+// main.js
+
+require.config({
+  ...
+});
+
+define([
+  'app'
+], function(App) {
+  App.initialize();
+});
+```
+
+And we are done.
+
+## VI. Testing
+
+Fire up the server
+
+```sh
+cd $projectRoot
+$(npm bin)/ws --log-level dev
+```
+
+### A. See Router in Action
+
+Open the javascript console, and browse to
+
+1. `http://localhost:8000/#users`
+
+    ```text
+    Show a list of users
+    ```
+
+2. `http://localhost:8000/#foobar`
+
+    ```text
+    We don't recognize this route: foobar
+    ```
+
+3. `http://lcoalhost:8000`
+
+    ```text
+    We don't recognize this route: null
+    ```
+
+### B. See that There is No Page Load
+
+The awesomeness of Single Page Apps is that no page-load (HTTP request) are
+made after the application is loaded. See for yourself!
+
+1. Open the Net console, and browse to `http://localhost:8000`.
+2. You will see a request for it, and the loading of various JS files.
+3. Now go to `http://localhost:8000/#users`, you'll see
+    1. **No** HTTP request to backend for the new path
+    2. The javascript console will show the result of the specified action
+4. Click the _Back_ button, it will take you back to `http://localhost:8000`.
+
+    Note that there is **no** HTTP request either, **and** the application is
+    navigable.
