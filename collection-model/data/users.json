@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "firstname": "Joe",
+      "lastname": "Lam",
+      "age": "31"
+    },
+    {
+      "firstname": "Foo",
+      "lastname": "Bar",
+      "age": "25"
+    }
+  ]
+}
