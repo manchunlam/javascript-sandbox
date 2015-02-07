@@ -9,7 +9,8 @@ come with a project to demonstrate the concepts.
 2. [Using `bower` to Manage `requirejs` Dependencies](bower-requirejs/README.md)
 3. [Using `shim`s in `requirejs`](requirejs-shims/README.md)
 4. [Backbone Router](backbone-router/README.md)
-5. [Acknowledgments](#acknowledgments)
+5. [Backbone Model](backbone-model/README.md)
+6. [Acknowledgments](#acknowledgments)
 
 ## Acknowledgments
 
