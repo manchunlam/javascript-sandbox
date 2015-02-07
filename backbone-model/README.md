@@ -191,7 +191,7 @@ Therefore, our model will automatically have these attributes.
 What if we have data that doesn't fit our desired model attributes? We
 **transform** them.
 
-Let's say our data looks like [`data/mutant_user.json`](data/mutant.json).
+Let's say our data looks like [`data/mutant_user.json`](data/mutant_user.json).
 
 The top-level key is `data`, but we want our attributes to be `firstname`,
 `lastname`, and `age`. Therefore, we can't depend on `Backbone.Model`'s default
